@@ -1,0 +1,16 @@
+[Unit]
+Description=Infrastructure AI Agents Server
+After=network.target
+Documentation=https://github.com/rsdenck/gentic
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/projects/gentic
+ExecStart=/root/projects/gentic/infrastructure-ai-agents
+Restart=always
+RestartSec=5
+EnvironmentFile=/etc/gentic/.env
+
+[Install]
+WantedBy=multi-user.target

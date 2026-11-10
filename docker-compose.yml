@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  gentic:
+    build: .
+    image: rsdenck/gentic:latest
+    container_name: gentic-server
+    restart: unless-stopped
+    environment:
+      - OLLAMA_SERVER_ADDRESS=https://api.denck.sbs
+      - OLLAMA_MODEL=muse-glimmer:30b-q4_K_M-dflash
+      - OLLAMA_TIMEOUT=300
+      - S3_ENDPOINT=https://s3.unifique.cloud
+      - S3_ACCESS_KEY=0GN/RjsHT7ZrTQ9u62M8k7qGYg1eKEd3NzFaFDfl
+      - S3_SECRET_KEY=0GN/RjsHT7ZrTQ9u62M8k7qGYg1eKEd3NzFaFDfl
+      - S3_REGION=us-east-1
+      - S3_BUCKET=default
+      - VMWARE_VCENTER_URL=https://seu-vcenter.com
+      - VMWARE_USERNAME=seu_usuario
+      - VMWARE_PASSWORD=sua_senha
+      - GRAYLOG_URL=https://seu-graylog.com
+      - GRAYLOG_TOKEN=sua_token_graylog
+      - CLOUDSTACK_URL=https://seu-cloudstack.com
+      - CLOUDSTACK_API_KEY=sua_chave_api
+      - CLOUDSTACK_SECRET_KEY=sua_chave_secreta
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./.env:/app/.env:ro
+    networks:
+      - gentic-network
+
+networks:
+  gentic-network:
+    driver: bridge
