@@ -28,7 +28,7 @@ jobs:
         run: go build -o infrastructure-ai-agents ./cmd/server/
 
       - name: 📋 Generate Release Notes
-        run |
+        run: |
           echo "Release notes generation..."
           git log --oneline -5
 
