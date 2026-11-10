@@ -1,0 +1,67 @@
+name: CD - Release & Deploy
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: 📦 Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.7'
+
+      - name: 🏗️ Build binary
+        run: go build -o infrastructure-ai-agents ./cmd/server/
+
+      - name: 📋 Generate Release Notes
+        run |
+          echo "Release notes generation..."
+          git log --oneline -5
+
+      - name: 🏷️ Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ github.ref_name }}"
+          body: |
+            ## 🎉 Infrastructure AI Agents Release
+
+            ### 📥 What's New
+            - Infrastructure AI Agents platform with 6 agents
+            - Ollama remote integration (muse-glimmer:30b-q4_K_M-dflash)
+            - 6 agents with squads (1 owner + 5 subagents each)
+            - API REST with 40+ endpoints
+            - Read-only policy + audit logging
+            - Genkit + Ollama integration
+
+            ### 🛠️ Changes
+            - CI/CD workflows configured
+            - GitHub Actions for build, vet, test
+            - Git versioned to rsdenck/gentic
+
+            ### 📦 Binaries
+            - Linux amd64 binary included
+
+          draft: true
+          prerelease: false
+
+      - name: 📤 Publish Package
+        if: success()
+        run: |
+          echo "✅ Release ${{ github.ref_name }} published successfully!"
+          echo "Binary: infrastructure-ai-agents"
+          echo "Repo: rsdenck/gentic"

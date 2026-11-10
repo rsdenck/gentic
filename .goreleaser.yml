@@ -1,0 +1,26 @@
+project_name: infrastructure-ai-agents
+before:
+  hooks:
+    - go mod tidy
+before_build:
+  hooks:
+    - go generate ./...
+builds:
+  - go: go build -o infrastructure-ai-agents ./cmd/server/
+    ldflags:
+      - -s -w
+    env:
+      - CGO_ENABLED=0
+    go:
+      goversion: '1.26.7'
+archives:
+  - name: infrastructure-ai-agents
+    format: zip
+    files:
+      - infrastructure-ai-agents
+checksum:
+  name_template: 'checksums.txt'
+dockers:
+  - image_templates: >-
+      rsdenck/gentic:${{ .Tag }}
+    push: false

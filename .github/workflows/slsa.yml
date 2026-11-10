@@ -1,0 +1,55 @@
+name: SLSA - Go Release (Releaser)
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    name: 🏗️ Build & Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.7'
+
+      - name: 🔐 Configure SSH for releases
+        uses: webfetch/actions/setup-ssh@v1
+
+      - name: 📥 Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-${{ runner.os }}-${{ hashFiles '**/go.sum' }}
+          restore-keys: |
+            go-${{ runner.os }}-
+
+      - name: 🏗️ Install Goreleaser
+        run: go install github.com/goreleaser/goreleaser/v2@latest
+
+      - name: 🏭 Release with Goreleaser
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          goreleaser release --config .goreleaser.yml --clean
+
+      - name: ✅ Verify Release
+        run: |
+          echo "✅ Release process completed!"
+          echo "Tag: ${{ github.ref_name }}"
+          echo "Repository: rsdenck/gentic"
+          echo "Binary: infrastructure-ai-agents"

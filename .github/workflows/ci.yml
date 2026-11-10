@@ -1,0 +1,51 @@
+name: CI - Infrastructure AI Agents
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.7'
+
+      - name: 📥 Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-${{ runner.os }}-${{ hashFiles '**/go.sum' }}
+          restore-keys: |
+            go-${{ runner.os }}-
+
+      - name: 🏗️ Build project
+        run: go build ./...
+
+      - name: 🔍 Vet project
+        run: go vet ./...
+
+      - name: 🧪 Run tests
+        run: go test ./...
+
+      - name: 📊 CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/${{ github.repository }}/go"
+
+      - name: 📤 Publish Go Package
+        if: success()
+        run: |
+          echo "Build completed successfully!"
+          go version
